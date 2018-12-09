@@ -1,6 +1,7 @@
 var express = require("express");
 var path = require('path');
 var app = express();
+var Chart = require("chart.js")
 
 app.set('views', path.join(__dirname, 'views')); //设置模版路径在views目录（默认）
 app.set("view engine", 'ejs'); //模版引擎设置为 ejs
