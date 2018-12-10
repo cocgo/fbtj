@@ -12,9 +12,9 @@ app.get("/", function (req, res) {
     res.render('index.ejs', {
         title: "演示",
         message: "点击次数",
-        item: ['a', 'b', 'c']
+        item: ['test1', 'test2']
     })
 })
 
 
-app.listen(3001, () => console.log('Example app listening on port 3001!'))
+app.listen(1338, () => console.log('fb statistics listening on port 1338!'))
