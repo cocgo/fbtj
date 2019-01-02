@@ -15,6 +15,7 @@ client.on('connect', function () {
     checkAllTj();
 });
 
+// tjBskball
 function addData() {
     let nowTime = Math.floor((new Date().getTime()) / 1000);
     let btnId = 1;
