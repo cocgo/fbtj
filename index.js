@@ -60,7 +60,7 @@ app.get('/getClick', (req, res) => {
             res.status(200).send(JSON.stringify(data));
         }
         // 发送数据
-        G.getTjBtnCurDays(gameId, btnIds, sendCData);        
+        G.getTjBtnHistoryDay(gameId, btnIds, sendCData);        
     } else {
         res.status(200).send('{"code":-1}');
     }

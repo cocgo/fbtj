@@ -38,7 +38,7 @@ global.G = {
 
     // 获取2位数的字符串 G.getTwoNum(1)
     getTwoNum(iNum) {
-        let strm = '' + (iNum + 1);
+        let strm = '' + iNum;
         if (strm.length == 1) {
             strm = '0' + strm;
         }
@@ -103,7 +103,7 @@ global.G = {
                         let nowTime = new Date();
                         let nowYear = nowTime.getFullYear();
                         let nowMonth = (nowTime.getMonth() + 1);
-                        let nowDay = nowTime.getDay();
+                        let nowDay = nowTime.getDate();
                         let nowHour = nowTime.getHours();
                         // console.log('gameAllBtnDatas: ',gameAllBtnDatas, typeof gameAllBtnDatas);
                         var isHaveBtnId = false;
@@ -198,7 +198,7 @@ global.G = {
                         let nowTime = new Date();
                         let nowYear = nowTime.getFullYear();
                         let nowMonth = (nowTime.getMonth() + 1);
-                        let nowDay = nowTime.getDay();
+                        let nowDay = nowTime.getDate();
                         let nowHour = nowTime.getHours();
                         // console.log('gameAllBtnDatas: ',gameAllBtnDatas, typeof gameAllBtnDatas);
                         // [{hour:1, count:8},{hour:2, count:8}]
@@ -223,8 +223,63 @@ global.G = {
         })
     },
     // 获取按钮 - 历史数据（单为：最近7天）
-    getTjBtnHistoryDay(gameId, btnIds){
+    getTjBtnHistoryDay(gameId, btnIds, cbFunc){
+        var toData = [];
+        let limitDay = 7;
+        for (let index = 0; index < btnIds.length; index++) {
+            const btnId = btnIds[index];
+            var oneData = {btnId:btnId, vdata:[]};
+            for (let j = 0; j < limitDay; j++) {
+                oneData.vdata.push(0);
+            }
+            toData.push(oneData);
+        }
+        // 按最近7天设置数据
+        function addBtnIdCount(btnId, lastDay, addCount){
+            for (let index = 0; index < toData.length; index++) {
+                if(toData[index].btnId == btnId){
+                    toData[index].vdata[lastDay] += addCount;
+                }
+            }
+        }
 
+        client.hgetall('arrTj', function (e, v) {
+            if (e) {
+                console.log('err2', e);
+            } else {
+                // console.log('v', v, typeof v);
+                if (v == null || v == '' || v == 'null') {
+                    console.log('没有统计，游戏id：', gameId);
+                    cbFunc([]);
+                }
+                for (var gid in v) {
+                    // console.log('tjData', typeof gid, gid);
+                    if (gid == gameId) {
+                        let strAllGameBtnData = v[gid];
+                        var gameAllBtnDatas = JSON.parse(strAllGameBtnData);
+                        for (let j = 0; j < gameAllBtnDatas.length; j++) {
+                            var gameAllOneBtnData = gameAllBtnDatas[j];
+                            let oneBtnDatas = gameAllOneBtnData.data;
+                            for (let index = 0; index < oneBtnDatas.length; index++) {
+                                const oned = oneBtnDatas[index];
+                                // 历史时间
+                                let hday = oned.year + '-' + G.getTwoNum(oned.month) + '-' + G.getTwoNum(oned.day);
+                                for (let k = 0; k < limitDay; k++) {
+                                    console.log('sss', hday , G.getdDay(-1*k))
+                                    if(hday == G.getdDay(-k)){
+                                        addBtnIdCount(gameAllOneBtnData.btnId, k, oned.count);
+                                    }
+                                }
+                            }
+                        }
+                        cbFunc(toData);
+                    }else{
+                        cbFunc([]);
+                    }
+
+                }
+            }
+        })
     },
 
     // 获取游戏的按钮数量
@@ -241,4 +296,94 @@ global.G = {
         return arrBtnIds;
     },
 
+
+
+
+
+
+
+
+
+
+    // 时间相关1
+    getdDay(day) {
+        var today = new Date();
+        var targetday_milliseconds = today.getTime() + 1000 * 60 * 60 * 24 * day;
+        today.setTime(targetday_milliseconds); //注意，这行是关键代码
+        var tYear = today.getFullYear();
+        var tMonth = today.getMonth();
+        var tDate = today.getDate();
+        tMonth = G.getTwoNum(tMonth + 1);
+        tDate = G.getTwoNum(tDate);
+        return tYear + "-" + tMonth + "-" + tDate;
+    },
+
+    // 时间相关2
+    formatDate(val) {
+        // 格式化时间
+        let start = new Date(val)
+        let y = start.getFullYear()
+        let m = (start.getMonth() + 1) > 10 ? (start.getMonth() + 1) : '0' + (start.getMonth() + 1)
+        let d = start.getDate() > 10 ? start.getDate() : '0' + start.getDate()
+        return y + '-' + m + '-' + d
+    },
+
+    mistiming(sDate1, sDate2) {
+        // 计算开始和结束的时间差
+        let aDate, oDate1, oDate2, iDays
+        aDate = sDate1.split('-')
+        oDate1 = new Date(aDate[1] + '-' + aDate[2] + '-' + aDate[0])
+        aDate = sDate2.split('-')
+        oDate2 = new Date(aDate[1] + '-' + aDate[2] + '-' + aDate[0])
+        iDays = parseInt(Math.abs(oDate1 - oDate2) / 1000 / 60 / 60 / 24)
+        return iDays + 1
+    },
+
+    countDate(start, end) {
+        // 判断开始和结束之间的时间差是否在90天内
+        let days = mistiming(start, end)
+        let stateT = days > 90 ? Boolean(0) : Boolean(1)
+        return {
+            state: stateT,
+            day: days
+        }
+    },
+    timeForMat(count) {
+        // 拼接时间
+        let time1 = new Date()
+        time1.setTime(time1.getTime() - (24 * 60 * 60 * 1000))
+        let Y1 = time1.getFullYear()
+        let M1 = ((time1.getMonth() + 1) > 10 ? (time1.getMonth() + 1) : '0' + (time1.getMonth() + 1))
+        let D1 = (time1.getDate() > 10 ? time1.getDate() : '0' + time1.getDate())
+        let timer1 = Y1 + '-' + M1 + '-' + D1 // 当前时间
+        let time2 = new Date()
+        time2.setTime(time2.getTime() - (24 * 60 * 60 * 1000 * count))
+        let Y2 = time2.getFullYear()
+        let M2 = ((time2.getMonth() + 1) > 10 ? (time2.getMonth() + 1) : '0' + (time2.getMonth() + 1))
+        let D2 = (time2.getDate() > 10 ? time2.getDate() : '0' + time2.getDate())
+        let timer2 = Y2 + '-' + M2 + '-' + D2 // 之前的7天或者30天
+        return {
+            t1: timer1,
+            t2: timer2
+        }
+    },
+
+    yesterday(start, end) {
+        // 校验是不是选择的昨天
+        let timer = timeForMat(1)
+        return timer
+    },
+
+    sevenDays() {
+        // 获取最近7天
+        let timer = timeForMat(7)
+        return timer
+    },
+
+    thirtyDays() {
+        // 获取最近30天
+        let timer = timeForMat(30)
+        return timer
+    },
+      
 }
