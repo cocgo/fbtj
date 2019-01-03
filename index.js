@@ -1,7 +1,9 @@
 'use strict';
+
 var express = require("express");
 var path = require('path');
 var app = express();
+const body_parser = require('body-parser');
 var Chart = require("chart.js");
 require("./gapi");
 
@@ -19,6 +21,8 @@ global.client = client;
 app.set('views', path.join(__dirname, 'views')); //设置模版路径在views目录（默认）
 app.set("view engine", 'ejs'); //模版引擎设置为 ejs
 
+
+app.use(body_parser.json());
 app.use(express.static('public'));
 app.get("/", function (req, res) {
     // views目录下寻找'index.ejs'
@@ -43,6 +47,20 @@ app.get('/addClick', (req, res) => {
         res.status(200).send('{"code":-1}');
     }
 });
+
+// 获取点击次数
+// app.post('/getClick', (req, res) => {
+//     let body = req.body;
+//     console.log('body:', body, typeof body);
+//     let gameId = body['gameId'];
+//     let btnId = body['btnId'];
+//     if (gameId && btnId) {
+        
+//         res.status(200).send('{"code":0}');
+//     } else {
+//         res.status(200).send('{"code":-1}');
+//     }
+// });
 
 app.get("/testa", function (req, res) {
     // views目录下寻找'testa.ejs'

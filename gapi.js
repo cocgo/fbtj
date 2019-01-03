@@ -32,8 +32,27 @@ global.G = {
         return strm;
     },
 
+    isInGameList(gameId, btnId){
+        for (let i = 0; i < G.arrGameBtns.length; i++) {
+            const oneg = G.arrGameBtns[i];
+            if(oneg.gameId == gameId){
+                for (let j = 0; j < oneg.btns.length; j++) {
+                    if(btnId == oneg.btns[j].bid){
+                        return true;
+                    }
+                }
+            }
+        }
+        console.log('no gameId, btnId');
+        return false;
+    },
+
     // 处理客户端点击按钮，加入统计
     handleClickCount(gameId, btnId) {
+        if(G.isInGameList(gameId, btnId) == false){
+            return;
+        }
+        // 是否有数据
         client.hexists("arrTj", gameId, function (err, res) {
             if (err) {
                 console.log('noredis arrTj:', err);
@@ -71,6 +90,7 @@ global.G = {
                         let strAllGameBtnData = v[gid];
                         var gameAllBtnData = JSON.parse(strAllGameBtnData);
                         if (gameAllBtnData.btnId == btnId) {
+                            // 某游戏的所有按钮id统计
                             let oneBtnDatas = gameAllBtnData.data;
                             // console.log('oneBtnDatas',oneBtnDatas);
                             // 现在时间
