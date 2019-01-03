@@ -49,7 +49,7 @@ global.G = {
                 } else {
                     // console.log('have tj gameid', res);
                 }
-                addOneClickData(gameId, btnId);
+                G.addOneClickData(gameId, btnId);
             }
         });
     },
