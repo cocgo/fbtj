@@ -2,7 +2,8 @@
 var express = require("express");
 var path = require('path');
 var app = express();
-var Chart = require("chart.js")
+var Chart = require("chart.js");
+require("./gapi");
 
 var redis = require("redis");
 var client = redis.createClient();
@@ -12,6 +13,8 @@ client.on("error", function (err) {
 client.on('connect', function(){
     console.log('Redis连接成功.');
 });
+// 全局redis接口
+global.client = client;
 
 app.set('views', path.join(__dirname, 'views')); //设置模版路径在views目录（默认）
 app.set("view engine", 'ejs'); //模版引擎设置为 ejs
@@ -28,6 +31,19 @@ app.get("/", function (req, res) {
     })
 })
 
+// 加入统计次数
+app.get('/addClick', (req, res) => {
+    let gameId = req.query['gameId'];
+    let btnId = req.query['btnId'];
+    if (gameId && btnId) {
+        // 加入统计数据
+        G.handleClickCount(gameId, btnId);
+        res.status(200).send('{"code":0}');
+    } else {
+        res.status(200).send('{"code":-1}');
+    }
+});
+
 app.get("/testa", function (req, res) {
     // views目录下寻找'testa.ejs'
     // res.render(路径， 数据对象)
@@ -37,7 +53,5 @@ app.get("/testa", function (req, res) {
         item: ['1', '2', '3']
     })
 })
-
-
 
 app.listen(1338, () => console.log('fb statistics listening on port 1338!'))
