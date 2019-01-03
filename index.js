@@ -53,13 +53,13 @@ app.post('/getClick', (req, res) => {
     let body = req.body;
     console.log('body:', body, typeof body);
     let gameId = body['gameId'];
-    let btnId = body['btnId'];
-    if (gameId && btnId) {
+    let btnIds = body['btnIds'];
+    if (gameId && btnIds) {
         function sendCData(data){
             res.status(200).send(JSON.stringify(data));
         }
         // 发送数据
-        G.getTjBtnCurDays(gameId, btnId, sendCData);        
+        G.getTjBtnCurDays(gameId, btnIds, sendCData);        
     } else {
         res.status(200).send('{"code":-1}');
     }
