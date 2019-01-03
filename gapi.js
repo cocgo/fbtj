@@ -73,11 +73,8 @@ global.G = {
                 // 1有 0没有
                 if (0 == res) {
                     // console.log('no tj gameid');
-                    let bdata = {
-                        btnId: btnId,
-                        data: []
-                    }
-                    client.hset("arrTj", gameId, JSON.stringify(bdata));
+                    let bdatas = [ { btnId: btnId, data: []} ];
+                    client.hset("arrTj", gameId, JSON.stringify(bdatas));
                 } else {
                     // console.log('have tj gameid', res);
                 }
@@ -101,43 +98,64 @@ global.G = {
                     // console.log('tjData', typeof gid, gid);
                     if (gid == gameId) {
                         let strAllGameBtnData = v[gid];
-                        var gameAllBtnData = JSON.parse(strAllGameBtnData);
-                        if (gameAllBtnData.btnId == btnId) {
-                            // 某游戏的所有按钮id统计
-                            let oneBtnDatas = gameAllBtnData.data;
-                            // console.log('oneBtnDatas',oneBtnDatas);
-                            // 现在时间
-                            let nowTime = new Date();
-                            let nowYear = nowTime.getFullYear();
-                            let nowMonth = (nowTime.getMonth() + 1);
-                            let nowDay = nowTime.getDay();
-                            let nowHour = nowTime.getHours();
-                            // 增|改 数据
-                            var isHave = false;
-                            for (let index = 0; index < oneBtnDatas.length; index++) {
-                                const oned = oneBtnDatas[index];
-                                // { year:2018, month:12, day:12, hour:1, count: 8},
-                                if (oned.year == nowYear && oned.month == nowMonth && oned.day == nowDay && oned.hour == nowHour) {
-                                    oned.count += 1;
-                                    isHave = true;
-                                    // console.log('add1', gameAllBtnData);
+                        var gameAllBtnDatas = JSON.parse(strAllGameBtnData);
+                        // 现在时间
+                        let nowTime = new Date();
+                        let nowYear = nowTime.getFullYear();
+                        let nowMonth = (nowTime.getMonth() + 1);
+                        let nowDay = nowTime.getDay();
+                        let nowHour = nowTime.getHours();
+                        // console.log('gameAllBtnDatas: ',gameAllBtnDatas, typeof gameAllBtnDatas);
+                        var isHaveBtnId = false;
+                        for (let j = 0; j < gameAllBtnDatas.length; j++) {
+                            var gameAllOneBtnData = gameAllBtnDatas[j];
+                            if (gameAllOneBtnData.btnId == btnId) {
+                                isHaveBtnId = true;
+                                // 某游戏的所有按钮id统计
+                                let oneBtnDatas = gameAllOneBtnData.data;
+                                // console.log('oneBtnDatas',oneBtnDatas);
+
+                                // 增|改 数据
+                                var isHave = false;
+                                for (let index = 0; index < oneBtnDatas.length; index++) {
+                                    const oned = oneBtnDatas[index];
+                                    // { year:2018, month:12, day:12, hour:1, count: 8},
+                                    if (oned.year == nowYear && oned.month == nowMonth && oned.day == nowDay && oned.hour == nowHour) {
+                                        oned.count += 1;
+                                        isHave = true;
+                                        // console.log('add1', gameAllBtnData);
+                                    }
                                 }
+                                if (isHave == false) {
+                                    let addOneHourData = {
+                                        year: nowYear,
+                                        month: nowMonth,
+                                        day: nowDay,
+                                        hour: nowHour,
+                                        count: 1
+                                    }
+                                    oneBtnDatas.push(addOneHourData);
+                                    // console.log('add2', gameAllBtnData);
+                                }                           
                             }
-                            if (isHave == false) {
-                                let addOneHourData = {
+                        }
+                        if(isHaveBtnId == false){
+                            // 没有记录新的按钮，则新增一个按钮组数据
+                            gameAllBtnDatas.push({
+                                btnId: btnId,
+                                data:[{
                                     year: nowYear,
                                     month: nowMonth,
                                     day: nowDay,
                                     hour: nowHour,
                                     count: 1
-                                }
-                                oneBtnDatas.push(addOneHourData);
-                                // console.log('add2', gameAllBtnData);
-                            }
-                            let newAllGameBtnData = JSON.stringify(gameAllBtnData);
-                            client.hset('arrTj', gameId, newAllGameBtnData);
-                            console.log('all btns', newAllGameBtnData);
+                                }]
+                            })
                         }
+                        // 更新数据
+                        let newAllGameBtnDatas = JSON.stringify(gameAllBtnDatas);
+                        client.hset('arrTj', gameId, newAllGameBtnDatas);
+                        console.log('all btns', newAllGameBtnDatas);
                     }
 
                 }
@@ -145,5 +163,40 @@ global.G = {
         })
     },
 
+    // 获取按钮 - 实时数据（单位：今日24小时）
+    getTjBtnCurDays(gameId, btnIds, cbFunc){
+        client.hgetall('arrTj', function (e, v) {
+            if (e) {
+                console.log('err2', e);
+            } else {
+                // console.log('v', v, typeof v);
+                if (v == null || v == '' || v == 'null') {
+                    console.log('没有统计，游戏id：', gameId);
+                    cbFunc([]);
+                }
+                for (var gid in v) {
+                    // console.log('tjData', typeof gid, gid);
+                    if (gid == gameId) {
+                        let strAllGameBtnData = v[gid];
+                        var gameAllBtnData = JSON.parse(strAllGameBtnData);
+                        // 现在时间
+                        let nowTime = new Date();
+                        let nowYear = nowTime.getFullYear();
+                        let nowMonth = (nowTime.getMonth() + 1);
+                        let nowDay = nowTime.getDay();
+                        let nowHour = nowTime.getHours();
+                        
+                    }else{
+                        cbFunc([]);
+                    }
+
+                }
+            }
+        })
+    },
+    // 获取按钮 - 历史数据（单为：最近7天）
+    getTjBtnHistoryDay(gameId, btnIds){
+
+    }
 
 }
