@@ -222,7 +222,7 @@ global.G = {
             }
         })
     },
-    // 获取按钮 - 历史数据（单为：最近7天）
+    // 获取按钮 - 历史数据（单位为：最近7天）
     getTjBtnHistoryDay(gameId, btnIds, cbFunc){
         var toData = [];
         let limitDay = 7;
