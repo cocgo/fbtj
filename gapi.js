@@ -8,6 +8,19 @@ global.G = {
                 {bid: 1, name:'按钮1'},
                 {bid: 2, name:'按钮2'},
                 {bid: 3, name:'按钮3'},
+                {bid: 4, name:'按钮4'},
+                {bid: 5, name:'按钮5'},
+            ]
+        },
+        {
+            gameId: 2,
+            name: 'Test Game',
+            btns:[
+                {bid: 1, name:'按钮1'},
+                {bid: 2, name:'按钮2'},
+                {bid: 3, name:'按钮3'},
+                {bid: 4, name:'按钮4'},
+                {bid: 5, name:'按钮5'},
             ]
         },
     ],

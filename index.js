@@ -49,18 +49,18 @@ app.get('/addClick', (req, res) => {
 });
 
 // 获取点击次数
-// app.post('/getClick', (req, res) => {
-//     let body = req.body;
-//     console.log('body:', body, typeof body);
-//     let gameId = body['gameId'];
-//     let btnId = body['btnId'];
-//     if (gameId && btnId) {
+app.post('/getClick', (req, res) => {
+    let body = req.body;
+    console.log('body:', body, typeof body);
+    let gameId = body['gameId'];
+    let btnId = body['btnId'];
+    if (gameId && btnId) {
         
-//         res.status(200).send('{"code":0}');
-//     } else {
-//         res.status(200).send('{"code":-1}');
-//     }
-// });
+        res.status(200).send('{"code":0}');
+    } else {
+        res.status(200).send('{"code":-1}');
+    }
+});
 
 app.get("/testa", function (req, res) {
     // views目录下寻找'testa.ejs'
