@@ -165,6 +165,21 @@ global.G = {
 
     // 获取按钮 - 实时数据（单位：今日24小时）
     getTjBtnCurDays(gameId, btnIds, cbFunc){
+        var toData = [];
+        for (let index = 0; btnIds < array.length; index++) {
+            const btnId = btnIds[index];
+            let oneData = {btnId:btnId, vdata:[0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0]};
+            toData.push(oneData);
+        }
+        // 按小时设置数据
+        function setBtnIdCount(btnId, hour, count){
+            for (let index = 0; index < toData.length; index++) {
+                if(toData[index].btnId == btnId){
+                    toData[index].vdata[hour-1] = count;
+                }
+            }
+        }
+
         client.hgetall('arrTj', function (e, v) {
             if (e) {
                 console.log('err2', e);
@@ -178,14 +193,27 @@ global.G = {
                     // console.log('tjData', typeof gid, gid);
                     if (gid == gameId) {
                         let strAllGameBtnData = v[gid];
-                        var gameAllBtnData = JSON.parse(strAllGameBtnData);
+                        var gameAllBtnDatas = JSON.parse(strAllGameBtnData);
                         // 现在时间
                         let nowTime = new Date();
                         let nowYear = nowTime.getFullYear();
                         let nowMonth = (nowTime.getMonth() + 1);
                         let nowDay = nowTime.getDay();
                         let nowHour = nowTime.getHours();
-                        
+                        // console.log('gameAllBtnDatas: ',gameAllBtnDatas, typeof gameAllBtnDatas);
+                        // [{hour:1, count:8},{hour:2, count:8}]
+                        for (let j = 0; j < gameAllBtnDatas.length; j++) {
+                            var gameAllOneBtnData = gameAllBtnDatas[j];
+                            let oneBtnDatas = gameAllOneBtnData.data;
+                            for (let index = 0; index < oneBtnDatas.length; index++) {
+                                const oned = oneBtnDatas[index];
+                                // { year:2018, month:12, day:12, hour:1, count: 8},
+                                if (oned.year == nowYear && oned.month == nowMonth && oned.day == nowDay ) {
+                                    setBtnIdCount(gameAllOneBtnData.btnId, oned.hour, oned.count);
+                                }
+                            }
+                        }
+                        cbFunc(toData);
                     }else{
                         cbFunc([]);
                     }
