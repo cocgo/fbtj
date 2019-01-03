@@ -166,7 +166,7 @@ global.G = {
     // 获取按钮 - 实时数据（单位：今日24小时）
     getTjBtnCurDays(gameId, btnIds, cbFunc){
         var toData = [];
-        for (let index = 0; btnIds < array.length; index++) {
+        for (let index = 0; index < btnIds.length; index++) {
             const btnId = btnIds[index];
             let oneData = {btnId:btnId, vdata:[0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0]};
             toData.push(oneData);
@@ -225,6 +225,20 @@ global.G = {
     // 获取按钮 - 历史数据（单为：最近7天）
     getTjBtnHistoryDay(gameId, btnIds){
 
-    }
+    },
+
+    // 获取游戏的按钮数量
+    getGameBtns(gameId){
+        let arrBtnIds = [];
+        for (let i = 0; i < G.arrGameBtns.length; i++) {
+            const oneg = G.arrGameBtns[i];
+            if(oneg.gameId == gameId){
+                for (let j = 0; j < oneg.btns.length; j++) {
+                    arrBtnIds.push(oneg.btns[j].bid);
+                }
+            }
+        }
+        return arrBtnIds;
+    },
 
 }

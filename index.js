@@ -49,11 +49,12 @@ app.get('/addClick', (req, res) => {
 });
 
 // 获取点击次数
-app.post('/getClick', (req, res) => {
-    let body = req.body;
-    console.log('body:', body, typeof body);
-    let gameId = body['gameId'];
-    let btnIds = body['btnIds'];
+app.get('/getClick', (req, res) => {
+    // let body = req.body;
+    // console.log('body:', body, typeof body);
+    // let gameId = body['gameId'];
+    let gameId = req.query['gameId'];
+    let btnIds = G.getGameBtns(gameId);
     if (gameId && btnIds) {
         function sendCData(data){
             res.status(200).send(JSON.stringify(data));
